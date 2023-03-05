@@ -1,6 +1,7 @@
 {
   "name": "rtraselbd/resellerclub-gsuite-php-api",
   "description": "PHP SDK for ResellerClub GSuite API",
+  "license": "MIT",
   "authors": [
     {
       "name": "Md Rasel Islam",
