@@ -26,4 +26,4 @@ Note: All functions return a raw response from API.
 
 
 ### Disclaimer
-This repository based on his [ResellerClub PHP SDK](https://github.com/afbora/resellerclub-php-sdk "ResellerClub PHP SDK") repository.
+This repository based on [ResellerClub PHP SDK](https://github.com/afbora/resellerclub-php-sdk "ResellerClub PHP SDK") repository.
