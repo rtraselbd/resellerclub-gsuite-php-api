@@ -14,7 +14,6 @@ composer require rtraselbd/resellerclub-gsuite-php-api
 ```php
 use RT\ResellerClub\ResellerClub;
 
-
 /**
 * Location: [1 = India, 2 = South East Asia & Egypt, 3 = Global]
 * Plan ID:  India, South East Asia & Egypt, Global [Business Starter = (1660,1663,1657), Business Standard = (1661,1664,1658), Business Plus = (1662,1665,1659), Enterprise Plus = (1554, 1560, 1557)]
