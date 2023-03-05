@@ -1,0 +1,23 @@
+{
+  "name": "rtraselbd/resellerclub-gsuite-php-api",
+  "description": "PHP SDK for ResellerClub GSuite API",
+  "license": "GPL 3",
+  "authors": [
+    {
+      "name": "Md Rasel Islam",
+      "email": "rtraselbd@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "ext-curl": "*",
+    "guzzlehttp/guzzle": "~6",
+    "ext-json": "*",
+    "psr/log": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "RT\\ResellerClub\\": "src/"
+    }
+  }
+}
