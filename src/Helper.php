@@ -3,132 +3,98 @@
 namespace RT\ResellerClub;
 
 use Exception;
-use GuzzleHttp\Client as Guzzle;
-use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
-use GuzzleHttp\RequestOptions;
 
 /**
  * Trait Helper
  * @package RT\ResellerClub
  */
+
 trait Helper
 {
+    private $baseURL;
+    private $curl = NULL;
+
     /**
-     * @var Guzzle
+     * Curl Options
+     *
+     * @var array
      */
-    protected $guzzle;
+
+    private $curlOptions = [];
 
     /**
      * Authentication info needed for every request
      *
      * @var array
      */
+
     private $authentication = [];
 
-    /**
-     * Helper constructor.
-     *
-     * @param Guzzle $guzzle
-     * @param array  $authentication
-     */
-    public function __construct(Guzzle $guzzle, array $authentication)
+    public function __construct($baseURL, $authentication)
     {
+        $this->baseURL = $baseURL;
         $this->authentication = $authentication;
-        $this->guzzle = $guzzle;
+        $this->curl = curl_init();
+        $this->setCurlOption(CURLOPT_RETURNTRANSFER, true);
     }
 
-    /**
-     * @param bool $locationNum
-     */
-    protected function getLocation(int $locationNum, $method)
+    public function __destruct()
     {
-        switch ($locationNum) {
-            case 1:
-                $name = 'in';
-                break;
-            case 2:
-                $name = 'se';
-                break;
-            case 3:
-                $name = 'gbl';
-                break;
-
-            default:
-                $name = 'gbl';
-                break;
-        }
-
-        return $name . '/' . $method;
+        curl_close($this->curl);
+    }
+    protected function setCurlOption($option, $value)
+    {
+        $this->curlOptions[$option] = $value;
     }
 
-    /**
-     * @param string $method
-     * @param array  $args
-     * @param string $prefix
-     *
-     * @return Exception|array
-     * @throws Exception
-     */
     protected function get($method, $args = [], $prefix = '')
     {
+        if (!empty($prefix)) {
+            $callURL = $this->baseURL . $this->api . '/' . $prefix . '/' . $method . '.json';
+        } else {
+            $callURL = $this->baseURL . $this->api . '/' . $method . '.json';
+        }
+
         try {
-            return $this->parse(
-                $this->guzzle->get(
-                    $this->api . '/' . $prefix . $method . '.json?' . preg_replace(
-                        '/%5B[0-9]+%5D/simU',
-                        '',
-                        http_build_query(
-                            array_merge($args, $this->authentication)
-                        )
-                    )
+            $this->setCurlOption(CURLOPT_URL, $callURL . '?' . preg_replace(
+                '/%5B[0-9]+%5D/simU',
+                '',
+                http_build_query(
+                    array_merge($args, $this->authentication)
                 )
-            );
-        } catch (ClientException $e) {
-            return $this->parse($e->getResponse());
-        } catch (ServerException $e) {
-            return $this->parse($e->getResponse());
-        } catch (BadResponseException $e) {
-            return $this->parse($e->getResponse());
+            ));
+            $this->setCurlOption(CURLOPT_HTTPGET, true);
+            $this->setCurlOption(CURLOPT_CUSTOMREQUEST, "GET");
+            return $this->executeRequest();
         } catch (Exception $error) {
-            return $error;
+            return ['status' => 'error', 'message' => $error->getMessage()];
+        }
+    }
+    protected function post($method, $args = [], $prefix = '')
+    {
+        if (!empty($prefix)) {
+            $callURL = $this->baseURL . $this->api . '/' . $prefix . '/' . $method . '.json';
+        } else {
+            $callURL = $this->baseURL . $this->api . '/' . $method . '.json';
+        }
+
+        try {
+            $this->setCurlOption(CURLOPT_URL, $callURL);
+            $this->setCurlOption(CURLOPT_POST, true);
+            $this->setCurlOption(CURLOPT_CUSTOMREQUEST, "POST");
+            $this->setCurlOption(CURLOPT_POSTFIELDS, http_build_query(
+                array_merge($args, $this->authentication)
+            ));
+            return $this->executeRequest();
+        } catch (Exception $error) {
+            return ['status' => 'error', 'message' => $error->getMessage()];
         }
     }
 
-
-    /**
-     * @param string $method
-     * @param array  $args
-     * @param string $prefix
-     *
-     * @return Exception|array
-     * @throws Exception
-     */
-    protected function post($method, $args = [], $prefix = '')
+    protected function executeRequest()
     {
-        //Todo use middleware to merge default values in guzzle
-        //Merge default args with sent one
-        $args = array_merge($args, $this->authentication);
-
-        try {
-            return $this->parse(
-                $this->guzzle->request(
-                    'POST',
-                    $this->api . '/' . $prefix . $method . '.json',
-                    [
-                        RequestOptions::FORM_PARAMS => $args,
-                    ]
-                )
-            );
-        } catch (ClientException $e) {
-            return $this->parse($e->getResponse());
-        } catch (ServerException $e) {
-            return $this->parse($e->getResponse());
-        } catch (BadResponseException $e) {
-            return $this->parse($e->getResponse());
-        } catch (Exception $error) {
-            return $error;
-        }
+        curl_setopt_array($this->curl, $this->curlOptions);
+        $response = curl_exec($this->curl);
+        return json_decode($response, true);
     }
 }
