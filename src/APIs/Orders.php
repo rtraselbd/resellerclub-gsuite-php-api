@@ -2,9 +2,7 @@
 
 namespace RT\ResellerClub\APIs;
 
-use Exception;
 use RT\ResellerClub\Helper;
-use SimpleXMLElement;
 
 /**
  * Class Orders
@@ -24,8 +22,7 @@ class Orders
      * @param int    $orderId
      * @param string $reason
      *
-     * @return array|Exception
-     * @throws Exception
+     * @return array
      * @link https://manage.logicboxes.com/kb/answer/1077
      */
     public function suspend($orderId, $reason)
@@ -43,8 +40,7 @@ class Orders
      * @param int    $orderId
      * @param string $reason
      *
-     * @return array|Exception
-     * @throws Exception
+     * @return array
      * @link https://manage.logicboxes.com/kb/answer/1078
      * @todo "reason" parameter does not exist in the documents.
      */
