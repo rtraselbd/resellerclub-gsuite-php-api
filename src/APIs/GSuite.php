@@ -2,7 +2,6 @@
 
 namespace RT\ResellerClub\APIs;
 
-use Exception;
 use RT\ResellerClub\Helper;
 
 /**
@@ -11,14 +10,13 @@ use RT\ResellerClub\Helper;
  * @package RT\ResellerClub\APIs
  * @todo    Check all the APIs parameters there are some changes.
  */
+
 class GSuite
 {
     use Helper;
 
-    /**
-     * @var string
-     */
     protected $api = 'gapps';
+
 
     /**
      * @param string $domainName
@@ -26,25 +24,24 @@ class GSuite
      * @param int $noOfAccounts
      * @param int $customerId
      * @param string $invoice Available options [NoInvoice, PayInvoice, KeepInvoice, OnlyAdd]
-     * @param int $loaction Available options [1 = India, 2 = South East Asia & Egypt, 3 = Global]
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
      * @param int $planId India, South East Asia & Egypt, Global [Business Starter = (1660,1663,1657), Business Standard = (1661,1664,1658), Business Plus = (1662,1665,1659), Enterprise Plus = (1554, 1560, 1557)]
      *
-     * @return array|Exception
-     * @throws Exception
+     * @return array
      * @link https://manage.logicboxes.com/kb/answer/2711
      */
+
     public function add(
         $domainName,
         $months,
         $noOfAccounts,
         $customerId,
         $invoice,
-        $loaction = 3,
+        $loaction,
         $planId = 1657
     ) {
-        $method = $this->getLocation($loaction, 'add');
         return $this->post(
-            $method,
+            'add',
             [
                 'domain-name'       => $domainName,
                 'months'            => $months,
@@ -52,7 +49,8 @@ class GSuite
                 'customer-id'       => $customerId,
                 'invoice-option'    => $invoice,
                 'plan-id'           => $planId
-            ]
+            ],
+            $loaction
         );
     }
 
@@ -66,10 +64,9 @@ class GSuite
      * @param string $customerName
      * @param string $company
      * @param string $zip
-     * @param int $loaction Available options [1 = India, 2 = South East Asia & Egypt, 3 = Global]
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
      *
-     * @return array|Exception
-     * @throws Exception
+     * @return array
      * @link https://manage.logicboxes.com/kb/answer/2713
      */
     public function addAdmin(
@@ -82,11 +79,10 @@ class GSuite
         $customerName,
         $company,
         $zip,
-        $loaction = 3
+        $loaction
     ) {
-        $method = $this->getLocation($loaction, 'admin/add');
         return $this->post(
-            $method,
+            'admin/add',
             [
                 'order-id'                  => $orderId,
                 'email-address'             => $email,
@@ -97,7 +93,8 @@ class GSuite
                 'name'                      => $customerName,
                 'company'                   => $company,
                 'zip'                       => $zip
-            ]
+            ],
+            $loaction
         );
     }
 
@@ -105,75 +102,102 @@ class GSuite
      * @param int $orderId
      * @param int $months
      * @param string $invoice Available options [NoInvoice, PayInvoice, KeepInvoice, OnlyAdd]
-     * @param int $loaction Available options [1 = India, 2 = South East Asia & Egypt, 3 = Global]
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
      *
-     * @return array|Exception
-     * @throws Exception
+     * @return array
      * @link https://manage.logicboxes.com/kb/answer/2712
      */
-    public function renew(
-        $orderId,
-        $months,
-        $invoice,
-        $loaction = 3,
-    ) {
-        $method = $this->getLocation($loaction, 'renew');
+    public function renew($orderId, $months, $invoice, $loaction)
+    {
         return $this->post(
-            $method,
+            'renew',
             [
                 'order-id'          => $orderId,
                 'months'            => $months,
-                'invoice-option'    => $invoice
-            ]
+                'invoice-option'    => $invoice,
+                'auto-renew'        => false
+            ],
+            $loaction
         );
     }
+
 
     /**
      * @param string $orderId
      * @param int $noOfAccounts
      * @param string $invoice Available options [NoInvoice, PayInvoice, KeepInvoice, OnlyAdd]
-     * @param int $loaction Available options [1 = India, 2 = South East Asia & Egypt, 3 = Global]
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
      *
-     * @return array|Exception
-     * @throws Exception
-     * @link https://manage.logicboxes.com/kb/answer/2711
+     * @return array
+     * @link https://manage.logicboxes.com/kb/answer/2714
      */
-    public function addAccount(
-        $orderId,
-        $noOfAccounts,
-        $invoice,
-        $loaction = 3
-    ) {
-        $method = $this->getLocation($loaction, 'add-account');
+    public function addAccount($orderId, $noOfAccounts, $invoice, $loaction)
+    {
         return $this->post(
-            $method,
+            'add-account',
             [
                 'order-id'          => $orderId,
                 'no-of-accounts'    => $noOfAccounts,
                 'invoice-option'    => $invoice
-            ]
+            ],
+            $loaction
+        );
+    }
+
+    /**
+     * @param int $orderId
+     * @param int $noOfAccounts
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
+     *
+     * @return array
+     * @link https://manage.logicboxes.com/kb/answer/2715
+     */
+    public function deleteAccount($orderId, $noOfAccounts, $loaction)
+    {
+        return $this->post(
+            'delete-account',
+            [
+                'order-id'          => $orderId,
+                'no-of-accounts'    => $noOfAccounts
+            ],
+            $loaction
         );
     }
 
 
     /**
-     * @param string $orderId
-     * @param int $loaction Available options [1 = India, 2 = South East Asia & Egypt, 3 = Global]
+     * @param int $orderId
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
      *
-     * @return array|Exception
-     * @throws Exception
-     * @link https://manage.logicboxes.com/kb/answer/2711
+     * @return array
+     * @link https://manage.logicboxes.com/kb/answer/2718
      */
-    public function delete(
-        $orderId,
-        $loaction = 3
-    ) {
-        $method = $this->getLocation($loaction, 'delete');
+    public function delete($orderId, $loaction)
+    {
         return $this->post(
-            $method,
+            'delete',
             [
                 'order-id'          => $orderId
-            ]
+            ],
+            $loaction
+        );
+    }
+
+    /**
+     * @param int $orderId
+     * @param string $loaction Available options [in = India, se = South East Asia & Egypt, gbl = Global]
+     *
+     * @return array
+     * @link https://manage.logicboxes.com/kb/answer/2719
+     */
+    public function details($orderId, $loaction)
+    {
+        return $this->get(
+            'details',
+            [
+                'order-id'          => $orderId
+            ],
+            $loaction
         );
     }
 }
